@@ -1,0 +1,39 @@
+# ─── Backend ───────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+
+# ─── Frontend ──────────────────────────────────────────────
+node_modules/
+dist/
+.vite/
+
+# ─── IDEs ──────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+.vscode/
+*.swp
+*.swo
+
+# ─── Sistema operacional ───────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Variáveis de ambiente / segredos ──────────────────────
+.env
+.env.local
+.env.production
+*.env
+
+# ─── Docker volumes (dados locais) ─────────────────────────
+postgres_data/
+
+# ─── Logs ──────────────────────────────────────────────────
+*.log
+logs/
