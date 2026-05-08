@@ -9,7 +9,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/barbeiros")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+
 public class BarbeiroController {
 
     private final UsuarioRepository repo;

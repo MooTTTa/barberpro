@@ -10,7 +10,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/servicos")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+
 public class ServicoController {
 
     private final ServicoRepository repo;
