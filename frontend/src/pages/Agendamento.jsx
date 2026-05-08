@@ -1,93 +1,212 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { criarAgendamento, listarServicos, listarClientes } from '../api/agendamentos'
+import { criarAgendamento, listarServicos, listarBarbeiros } from '../api/agendamentos'
+
+const slides = ['/barber1.jpg', '/barber2.jpg', '/barber3.jpg']
 
 export default function Agendamento() {
   const { register, handleSubmit, reset } = useForm()
   const [servicos, setServicos] = useState([])
-  const [clientes, setClientes] = useState([])
+  const [barbeiros, setBarbeiros] = useState([])
   const [sucesso, setSucesso] = useState(false)
+  const [slideAtual, setSlideAtual] = useState(0)
 
   useEffect(() => {
     listarServicos().then(r => setServicos(r.data))
-    listarClientes().then(r => setClientes(r.data))
+    listarBarbeiros().then(r => setBarbeiros(r.data))
+  }, [])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSlideAtual(prev => (prev + 1) % slides.length)
+    }, 4000)
+    return () => clearInterval(interval)
   }, [])
 
   const onSubmit = async (data) => {
     try {
       await criarAgendamento({
-        clienteId: Number(data.clienteId),
+        clienteNome: data.clienteNome,
+        clienteTelefone: data.clienteTelefone,
+        barbeiroId: Number(data.barbeiroId),
         servicoId: Number(data.servicoId),
         dataHora: data.dataHora,
         observacao: data.observacao,
       })
       setSucesso(true)
       reset()
-      setTimeout(() => setSucesso(false), 4000)
+      setTimeout(() => setSucesso(false), 5000)
     } catch (e) {
       alert(e.response?.data?.message || 'Erro ao agendar')
     }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-1">Agendar horario</h1>
-        <p className="text-gray-500 text-sm mb-6">
-          Preencha e receba a confirmacao pelo WhatsApp
-        </p>
+    <div className="min-h-screen flex">
 
-        {sucesso && (
-          <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg p-3 mb-4 text-sm">
-            Agendamento confirmado! Verifique seu WhatsApp.
+      {/* Lado esquerdo — fotos com slideshow */}
+      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
+        {slides.map((src, i) => (
+          <div
+            key={i}
+            className="absolute inset-0 transition-opacity duration-1000"
+            style={{ opacity: i === slideAtual ? 1 : 0 }}
+          >
+            <img src={src} alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/50" />
           </div>
-        )}
+        ))}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <select
-            {...register('clienteId')}
-            required
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="">Selecione o cliente</option>
-            {clientes.map(c => (
-              <option key={c.id} value={c.id}>{c.nome}</option>
+        {/* Overlay com texto */}
+        <div className="absolute inset-0 flex flex-col justify-end p-12 z-10">
+          <p className="text-amber-400 text-sm font-semibold tracking-widest uppercase mb-2">
+            Bem-vindo
+          </p>
+          <h1 className="text-white text-4xl font-bold leading-tight mb-4">
+            Seu estilo,<br />nossa arte.
+          </h1>
+          <p className="text-gray-300 text-sm max-w-xs">
+            Agende seu horário em segundos e receba confirmação direto no WhatsApp.
+          </p>
+
+          {/* Indicadores do slide */}
+          <div className="flex gap-2 mt-8">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setSlideAtual(i)}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  i === slideAtual ? 'w-8 bg-amber-400' : 'w-2 bg-white/40'
+                }`}
+              />
             ))}
-          </select>
+          </div>
+        </div>
+      </div>
 
-          <select
-            {...register('servicoId')}
-            required
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="">Selecione o servico</option>
-            {servicos.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.nome} — R$ {s.preco} ({s.duracaoMinutos}min)
-              </option>
-            ))}
-          </select>
+      {/* Lado direito — formulário */}
+      <div className="w-full lg:w-1/2 bg-zinc-950 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
 
-          <input
-            {...register('dataHora')}
-            type="datetime-local"
-            required
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          />
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-8 h-0.5 bg-amber-400" />
+              <span className="text-amber-400 text-xs font-semibold tracking-widest uppercase">
+                BarberPro
+              </span>
+            </div>
+            <h2 className="text-white text-3xl font-bold">Agendar horário</h2>
+            <p className="text-zinc-400 text-sm mt-1">
+              Preencha os dados e receba confirmação pelo WhatsApp
+            </p>
+          </div>
 
-          <input
-            {...register('observacao')}
-            placeholder="Observacao (opcional)"
-            className="w-full border rounded-lg px-3 py-2 text-sm"
-          />
+          {/* Sucesso */}
+          {sucesso && (
+            <div className="bg-amber-400/10 border border-amber-400/30 text-amber-400 rounded-lg p-4 mb-6 text-sm flex items-center gap-2">
+              <span>✓</span>
+              Agendamento confirmado! Verifique seu WhatsApp.
+            </div>
+          )}
 
-          <button
-            type="submit"
-            className="w-full bg-black text-white rounded-lg py-2 text-sm font-medium hover:bg-gray-800 transition"
-          >
-            Confirmar agendamento
-          </button>
-        </form>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+            {/* Nome */}
+            <div>
+              <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
+                Seu nome
+              </label>
+              <input
+                {...register('clienteNome')}
+                required
+                placeholder="João Silva"
+                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm placeholder-zinc-600 focus:outline-none focus:border-amber-400 transition"
+              />
+            </div>
+
+            {/* Telefone */}
+            <div>
+              <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
+                WhatsApp
+              </label>
+              <input
+                {...register('clienteTelefone')}
+                required
+                placeholder="55 11 99999-0000"
+                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm placeholder-zinc-600 focus:outline-none focus:border-amber-400 transition"
+              />
+            </div>
+
+            {/* Barbeiro */}
+            <div>
+              <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
+                Barbeiro
+              </label>
+              <select
+                {...register('barbeiroId')}
+                required
+                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-400 transition"
+              >
+                <option value="">Selecione o barbeiro</option>
+                {barbeiros.map(b => (
+                  <option key={b.id} value={b.id}>{b.nome}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Serviço */}
+            <div>
+              <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
+                Serviço
+              </label>
+              <select
+                {...register('servicoId')}
+                required
+                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-400 transition"
+              >
+                <option value="">Selecione o serviço</option>
+                {servicos.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.nome} — R$ {s.preco} ({s.duracaoMinutos}min)
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Data e hora */}
+            <div>
+              <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
+                Data e hora
+              </label>
+              <input
+                {...register('dataHora')}
+                type="datetime-local"
+                required
+                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-400 transition"
+              />
+            </div>
+
+            {/* Observação */}
+            <div>
+              <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
+                Observação <span className="normal-case text-zinc-600">(opcional)</span>
+              </label>
+              <input
+                {...register('observacao')}
+                placeholder="Ex: quero degradê na máquina 2"
+                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm placeholder-zinc-600 focus:outline-none focus:border-amber-400 transition"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-amber-400 hover:bg-amber-300 text-black font-semibold rounded-lg py-3 text-sm transition mt-2"
+            >
+              Confirmar agendamento
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )

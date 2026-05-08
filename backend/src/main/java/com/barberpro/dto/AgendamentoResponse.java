@@ -7,6 +7,7 @@ public record AgendamentoResponse(
     Long id,
     String clienteNome,
     String clienteTelefone,
+    String barbeiroNome,
     String servicoNome,
     Integer duracaoMinutos,
     LocalDateTime dataHora,
@@ -16,8 +17,9 @@ public record AgendamentoResponse(
     public static AgendamentoResponse from(Agendamento a) {
         return new AgendamentoResponse(
             a.getId(),
-            a.getCliente().getNome(),
-            a.getCliente().getTelefone(),
+            a.getClienteNome(),
+            a.getClienteTelefone(),
+            a.getBarbeiro() != null ? a.getBarbeiro().getNome() : "-",
             a.getServico().getNome(),
             a.getServico().getDuracaoMinutos(),
             a.getDataHora(),

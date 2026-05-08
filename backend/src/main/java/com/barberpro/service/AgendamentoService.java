@@ -3,11 +3,11 @@ package com.barberpro.service;
 import com.barberpro.dto.AgendamentoRequest;
 import com.barberpro.dto.AgendamentoResponse;
 import com.barberpro.entity.Agendamento;
-import com.barberpro.entity.Cliente;
 import com.barberpro.entity.Servico;
+import com.barberpro.entity.Usuario;
 import com.barberpro.repository.AgendamentoRepository;
-import com.barberpro.repository.ClienteRepository;
 import com.barberpro.repository.ServicoRepository;
+import com.barberpro.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -19,8 +19,8 @@ import java.util.List;
 public class AgendamentoService {
 
     private final AgendamentoRepository agendamentoRepo;
-    private final ClienteRepository clienteRepo;
     private final ServicoRepository servicoRepo;
+    private final UsuarioRepository usuarioRepo;
     private final WhatsAppService whatsAppService;
 
     public AgendamentoResponse criar(AgendamentoRequest req) {
@@ -29,13 +29,16 @@ public class AgendamentoService {
             throw new RuntimeException("Horário já ocupado: " + req.dataHora());
         }
 
-        Cliente cliente = clienteRepo.findById(req.clienteId())
-            .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
         Servico servico = servicoRepo.findById(req.servicoId())
             .orElseThrow(() -> new RuntimeException("Serviço não encontrado"));
 
+        Usuario barbeiro = usuarioRepo.findById(req.barbeiroId())
+            .orElseThrow(() -> new RuntimeException("Barbeiro não encontrado"));
+
         Agendamento agendamento = Agendamento.builder()
-            .cliente(cliente)
+            .clienteNome(req.clienteNome())
+            .clienteTelefone(req.clienteTelefone())
+            .barbeiro(barbeiro)
             .servico(servico)
             .dataHora(req.dataHora())
             .observacao(req.observacao())

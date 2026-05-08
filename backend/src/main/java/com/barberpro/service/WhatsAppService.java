@@ -25,6 +25,13 @@ public class WhatsAppService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    private org.springframework.http.HttpEntity<Object> buildRequest(Object body) {
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.set("apikey", apiKey);
+        headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+        return new org.springframework.http.HttpEntity<>(body, headers);
+    }
+
     public void enviarConfirmacao(Agendamento ag) {
         String data = ag.getDataHora().format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'as' HH:mm"));
         String msg = String.format(
@@ -33,18 +40,18 @@ public class WhatsAppService {
             "Data: %s\n" +
             "Servico: %s\n\n" +
             "Para cancelar, responda CANCELAR.",
-            ag.getCliente().getNome(), data, ag.getServico().getNome()
+            ag.getClienteNome(), data, ag.getServico().getNome()
         );
-        enviar(ag.getCliente().getTelefone(), msg);
+        enviar(ag.getClienteTelefone(), msg);
     }
 
     public void enviarLembrete(Agendamento ag) {
         String hora = ag.getDataHora().format(DateTimeFormatter.ofPattern("HH:mm"));
         String msg = String.format(
             "Lembrete BarberPro\n\nOla, %s! Seu horario e hoje as %s.",
-            ag.getCliente().getNome(), hora
+            ag.getClienteNome(), hora
         );
-        enviar(ag.getCliente().getTelefone(), msg);
+        enviar(ag.getClienteTelefone(), msg);
     }
 
     private void enviar(String telefone, String mensagem) {
@@ -52,10 +59,10 @@ public class WhatsAppService {
             String url = apiUrl + "/message/sendText/" + instance;
             Map<String, Object> body = Map.of(
                 "number", telefone,
-                "text", mensagem
+                "textMessage", Map.of("text", mensagem)
             );
             log.info("WhatsApp -> {} | {}", telefone, mensagem);
-            // restTemplate.postForObject(url, body, Object.class);
+            restTemplate.postForObject(url, buildRequest(body), Object.class);
         } catch (Exception e) {
             log.error("Falha ao enviar WhatsApp para {}: {}", telefone, e.getMessage());
         }
