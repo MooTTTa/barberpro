@@ -84,7 +84,29 @@ export default function Agendamento() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
+
+      {/* Banner mobile — aparece só em telas pequenas */}
+      <div className="lg:hidden relative h-48 overflow-hidden shrink-0">
+        {slides.map((src, i) => (
+          <div
+            key={i}
+            className="absolute inset-0 transition-opacity duration-1000"
+            style={{ opacity: i === slideAtual ? 1 : 0 }}
+          >
+            <img src={src} alt="" className="w-full h-full object-cover object-center" />
+            <div className="absolute inset-0 bg-black/60" />
+          </div>
+        ))}
+        <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-6 h-0.5 bg-amber-400" />
+            <span className="text-amber-400 text-xs font-semibold tracking-widest uppercase">BarberPro</span>
+            <div className="w-6 h-0.5 bg-amber-400" />
+          </div>
+          <h1 className="text-white text-2xl font-bold">Seu estilo, nossa arte.</h1>
+        </div>
+      </div>
 
       {/* Lado esquerdo — fotos com slideshow */}
       <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
