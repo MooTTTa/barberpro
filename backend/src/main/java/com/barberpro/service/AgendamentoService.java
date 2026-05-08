@@ -23,10 +23,40 @@ public class AgendamentoService {
     private final UsuarioRepository usuarioRepo;
     private final WhatsAppService whatsAppService;
 
+    public List<String> horariosOcupados(LocalDate data) {
+        LocalDateTime inicio = data.atStartOfDay();
+        LocalDateTime fim    = data.atTime(23, 59, 59);
+        return agendamentoRepo.findByPeriodo(inicio, fim)
+            .stream()
+            .filter(a -> a.getStatus() != Agendamento.StatusAgendamento.CANCELADO)
+            .map(a -> a.getDataHora().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")))
+            .toList();
+    }
+
+    private void validarHorarioAtendimento(LocalDateTime dataHora) {
+        java.time.DayOfWeek dia = dataHora.getDayOfWeek();
+        int hora = dataHora.getHour();
+
+        if (dia == java.time.DayOfWeek.SUNDAY) {
+            throw new RuntimeException("Não atendemos aos domingos.");
+        }
+        if (dia == java.time.DayOfWeek.SATURDAY) {
+            if (hora < 8 || hora >= 13) {
+                throw new RuntimeException("Sábado: atendemos das 08h às 13h.");
+            }
+        } else {
+            if (hora < 9 || hora >= 19) {
+                throw new RuntimeException("Segunda a sexta: atendemos das 09h às 19h.");
+            }
+        }
+    }
+
     public AgendamentoResponse criar(AgendamentoRequest req) {
+        validarHorarioAtendimento(req.dataHora());
+
         List<Agendamento> conflitos = agendamentoRepo.findHorarioOcupado(req.dataHora());
         if (!conflitos.isEmpty()) {
-            throw new RuntimeException("Horário já ocupado: " + req.dataHora());
+            throw new RuntimeException("Horário indisponível. Por favor, escolha outro horário.");
         }
 
         Servico servico = servicoRepo.findById(req.servicoId())
@@ -42,13 +72,22 @@ public class AgendamentoService {
             .servico(servico)
             .dataHora(req.dataHora())
             .observacao(req.observacao())
-            .status(Agendamento.StatusAgendamento.CONFIRMADO)
+            .status(Agendamento.StatusAgendamento.PENDENTE)
             .build();
 
         agendamento = agendamentoRepo.save(agendamento);
-        whatsAppService.enviarConfirmacao(agendamento);
 
         return AgendamentoResponse.from(agendamento);
+    }
+
+    public List<AgendamentoResponse> listarPorSemana(LocalDate inicio, LocalDate fim) {
+        return agendamentoRepo.findByPeriodo(inicio.atStartOfDay(), fim.atTime(23, 59, 59))
+            .stream().map(AgendamentoResponse::from).toList();
+    }
+
+    public List<AgendamentoResponse> listarTodos() {
+        return agendamentoRepo.findAll(org.springframework.data.domain.Sort.by("dataHora"))
+            .stream().map(AgendamentoResponse::from).toList();
     }
 
     public List<AgendamentoResponse> listarPorDia(LocalDate data) {
@@ -56,6 +95,24 @@ public class AgendamentoService {
         LocalDateTime fim    = data.atTime(23, 59, 59);
         return agendamentoRepo.findByPeriodo(inicio, fim)
             .stream().map(AgendamentoResponse::from).toList();
+    }
+
+    public AgendamentoResponse confirmar(Long id) {
+        Agendamento ag = agendamentoRepo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
+        ag.setStatus(Agendamento.StatusAgendamento.CONFIRMADO);
+        ag = agendamentoRepo.save(ag);
+        whatsAppService.enviarConfirmacao(ag);
+        return AgendamentoResponse.from(ag);
+    }
+
+    public AgendamentoResponse recusar(Long id) {
+        Agendamento ag = agendamentoRepo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Agendamento não encontrado"));
+        ag.setStatus(Agendamento.StatusAgendamento.CANCELADO);
+        ag = agendamentoRepo.save(ag);
+        whatsAppService.enviarRecusa(ag);
+        return AgendamentoResponse.from(ag);
     }
 
     public AgendamentoResponse cancelar(Long id) {
