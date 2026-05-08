@@ -11,9 +11,15 @@ public class Agendamento {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "cliente_nome", nullable = false)
+    private String clienteNome;
+
+    @Column(name = "cliente_telefone", nullable = false)
+    private String clienteTelefone;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cliente_id", nullable = false)
-    private Cliente cliente;
+    @JoinColumn(name = "barbeiro_id")
+    private Usuario barbeiro;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "servico_id", nullable = false)
