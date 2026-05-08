@@ -28,7 +28,8 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/agendamentos", "POST")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/servicos", "GET")).permitAll()
-.requestMatchers(new AntPathRequestMatcher("/api/barbeiros", "GET")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/barbeiros", "GET")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/agendamentos/horarios-ocupados", "GET")).permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class);

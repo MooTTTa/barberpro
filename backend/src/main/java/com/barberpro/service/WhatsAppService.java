@@ -36,12 +36,23 @@ public class WhatsAppService {
         String data = ag.getDataHora().format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'as' HH:mm"));
         String barbeiro = ag.getBarbeiro() != null ? ag.getBarbeiro().getNome() : "a equipe";
         String msg = String.format(
-            "BarberPro - Agendamento confirmado!\n\n" +
-            "Ola, %s! Seu horario foi marcado.\n\n" +
-            "Data: %s\n" +
-            "Servico: %s\n" +
-            "Barbeiro: %s",
+            "✅ *BarberPro* - Agendamento confirmado!\n\n" +
+            "Ola, *%s*! Seu horario foi marcado.\n\n" +
+            "📅 *Data:* %s\n" +
+            "✂️ *Servico:* %s\n" +
+            "💈 *Barbeiro:* %s",
             ag.getClienteNome(), data, ag.getServico().getNome(), barbeiro
+        );
+        enviar(ag.getClienteTelefone(), msg);
+    }
+
+    public void enviarRecusa(Agendamento ag) {
+        String data = ag.getDataHora().format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'as' HH:mm"));
+        String msg = String.format(
+            "❌ *BarberPro* - Agendamento nao confirmado.\n\n" +
+            "Ola, *%s*! Infelizmente o horario *%s* nao esta disponivel.\n\n" +
+            "🔄 Acesse o site novamente e escolha outra data para seu atendimento.",
+            ag.getClienteNome(), data
         );
         enviar(ag.getClienteTelefone(), msg);
     }

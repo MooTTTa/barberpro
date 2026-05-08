@@ -44,6 +44,17 @@
   color: #52525b !important;
 }
 
+.barberpro-calendar .domingo-fechado {
+  color: #ef4444 !important;
+  opacity: 0.5;
+  text-decoration: line-through;
+  cursor: not-allowed !important;
+}
+
+.barberpro-calendar .react-datepicker__day-name:last-child {
+  color: #ef4444 !important;
+}
+
 .barberpro-calendar .react-datepicker__navigation-icon::before {
   border-color: #a1a1aa !important;
 }
@@ -77,4 +88,18 @@
 
 .barberpro-calendar .react-datepicker-time__header {
   color: white !important;
+}
+
+.barberpro-calendar .horario-ocupado {
+  color: #ef4444 !important;
+  text-decoration: line-through;
+  opacity: 0.5;
+  cursor: not-allowed !important;
+}
+
+.barberpro-calendar .react-datepicker__time-list-item--disabled {
+  color: #ef4444 !important;
+  opacity: 0.5;
+  text-decoration: line-through;
+  cursor: not-allowed !important;
 }

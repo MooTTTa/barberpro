@@ -4,7 +4,7 @@ import DatePicker, { registerLocale } from 'react-datepicker'
 import { ptBR } from 'date-fns/locale'
 import { format } from 'date-fns'
 import 'react-datepicker/dist/react-datepicker.css'
-import { criarAgendamento, listarServicos, listarBarbeiros } from '../api/agendamentos'
+import { criarAgendamento, listarServicos, listarBarbeiros, horariosOcupados } from '../api/agendamentos'
 import PhoneInput from '../components/PhoneInput'
 
 registerLocale('pt-BR', ptBR)
@@ -18,6 +18,8 @@ export default function Agendamento() {
   const [sucesso, setSucesso] = useState(false)
   const [slideAtual, setSlideAtual] = useState(0)
   const [dataHora, setDataHora] = useState(null)
+  const [ocupados, setOcupados] = useState([])
+  const [erro, setErro] = useState('')
   const [telefone, setTelefone] = useState('')
   const [telefoneFormatado, setTelefoneFormatado] = useState('')
 
@@ -32,6 +34,31 @@ export default function Agendamento() {
     }, 4000)
     return () => clearInterval(interval)
   }, [])
+
+  const filterDate = (date) => date.getDay() !== 0
+
+  const filterTime = (time) => {
+    const dia = time.getDay()
+    const total = time.getHours() * 60 + time.getMinutes()
+    if (dia === 0) return false
+    if (dia === 6) return total >= 8 * 60 && total < 13 * 60
+    return total >= 9 * 60 && total < 19 * 60
+  }
+
+  const handleDataChange = (date) => {
+    setDataHora(date)
+    setErro('')
+    if (date) {
+      const dataStr = format(date, 'yyyy-MM-dd')
+      horariosOcupados(dataStr).then(r => setOcupados(r.data))
+    }
+  }
+
+  const isOcupado = (time) => {
+    const h = String(time.getHours()).padStart(2, '0')
+    const m = String(time.getMinutes()).padStart(2, '0')
+    return ocupados.includes(`${h}:${m}`)
+  }
 
   const onSubmit = async (data) => {
     if (!dataHora) { alert('Selecione a data e hora'); return }
@@ -52,7 +79,7 @@ export default function Agendamento() {
       setTelefoneFormatado('')
       setTimeout(() => setSucesso(false), 5000)
     } catch (e) {
-      alert(e.response?.data?.message || 'Erro ao agendar')
+      setErro(e.response?.data?.message || 'Erro ao agendar. Tente novamente.')
     }
   }
 
@@ -116,7 +143,14 @@ export default function Agendamento() {
           {sucesso && (
             <div className="bg-amber-400/10 border border-amber-400/30 text-amber-400 rounded-lg p-4 mb-6 text-sm flex items-center gap-2">
               <span>✓</span>
-              Agendamento confirmado! Verifique seu WhatsApp.
+              Solicitação enviada! Aguarde a confirmação pelo WhatsApp.
+            </div>
+          )}
+
+          {erro && (
+            <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg p-4 mb-6 text-sm flex items-center gap-2">
+              <span>✕</span>
+              {erro}
             </div>
           )}
 
@@ -188,7 +222,7 @@ export default function Agendamento() {
               </label>
               <DatePicker
                 selected={dataHora}
-                onChange={setDataHora}
+                onChange={handleDataChange}
                 showTimeSelect
                 timeFormat="HH:mm"
                 timeIntervals={30}
@@ -196,10 +230,17 @@ export default function Agendamento() {
                 locale="pt-BR"
                 placeholderText="Selecione a data e hora"
                 minDate={new Date()}
+                filterDate={filterDate}
+                filterTime={(time) => filterTime(time) && !isOcupado(time)}
+                timeClassName={(time) => isOcupado(time) ? 'horario-ocupado' : ''}
+                dayClassName={date => date.getDay() === 0 ? 'domingo-fechado' : undefined}
                 className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm placeholder-zinc-600 focus:outline-none focus:border-amber-400 transition"
                 calendarClassName="barberpro-calendar"
                 wrapperClassName="w-full"
               />
+              <p className="text-zinc-600 text-xs mt-1">
+                Seg–Sex: 09h às 19h &nbsp;·&nbsp; Sáb: 08h às 13h &nbsp;·&nbsp; Dom: fechado
+              </p>
             </div>
 
             <div>
