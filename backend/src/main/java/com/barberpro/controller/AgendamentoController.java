@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/agendamentos")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+
 public class AgendamentoController {
 
     private final AgendamentoService service;
