@@ -5,6 +5,7 @@ import { ptBR } from 'date-fns/locale'
 import { format } from 'date-fns'
 import 'react-datepicker/dist/react-datepicker.css'
 import { criarAgendamento, listarServicos, listarBarbeiros } from '../api/agendamentos'
+import PhoneInput from '../components/PhoneInput'
 
 registerLocale('pt-BR', ptBR)
 
@@ -17,6 +18,8 @@ export default function Agendamento() {
   const [sucesso, setSucesso] = useState(false)
   const [slideAtual, setSlideAtual] = useState(0)
   const [dataHora, setDataHora] = useState(null)
+  const [telefone, setTelefone] = useState('')
+  const [telefoneFormatado, setTelefoneFormatado] = useState('')
 
   useEffect(() => {
     listarServicos().then(r => setServicos(r.data))
@@ -32,10 +35,11 @@ export default function Agendamento() {
 
   const onSubmit = async (data) => {
     if (!dataHora) { alert('Selecione a data e hora'); return }
+    if (!telefone) { alert('Informe o WhatsApp'); return }
     try {
       await criarAgendamento({
         clienteNome: data.clienteNome,
-        clienteTelefone: data.clienteTelefone,
+        clienteTelefone: telefone,
         barbeiroId: Number(data.barbeiroId),
         servicoId: Number(data.servicoId),
         dataHora: format(dataHora, "yyyy-MM-dd'T'HH:mm:ss"),
@@ -44,6 +48,8 @@ export default function Agendamento() {
       setSucesso(true)
       reset()
       setDataHora(null)
+      setTelefone('')
+      setTelefoneFormatado('')
       setTimeout(() => setSucesso(false), 5000)
     } catch (e) {
       alert(e.response?.data?.message || 'Erro ao agendar')
@@ -132,11 +138,12 @@ export default function Agendamento() {
               <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
                 WhatsApp
               </label>
-              <input
-                {...register('clienteTelefone')}
-                required
-                placeholder="55 11 99999-0000"
-                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm placeholder-zinc-600 focus:outline-none focus:border-amber-400 transition"
+              <PhoneInput
+                value={telefoneFormatado}
+                onChange={(e164, formatado) => {
+                  setTelefone(e164)
+                  setTelefoneFormatado(formatado)
+                }}
               />
             </div>
 

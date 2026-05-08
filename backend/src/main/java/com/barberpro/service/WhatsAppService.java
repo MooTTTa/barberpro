@@ -34,13 +34,14 @@ public class WhatsAppService {
 
     public void enviarConfirmacao(Agendamento ag) {
         String data = ag.getDataHora().format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'as' HH:mm"));
+        String barbeiro = ag.getBarbeiro() != null ? ag.getBarbeiro().getNome() : "a equipe";
         String msg = String.format(
             "BarberPro - Agendamento confirmado!\n\n" +
             "Ola, %s! Seu horario foi marcado.\n\n" +
             "Data: %s\n" +
-            "Servico: %s\n\n" +
-            "Para cancelar, responda CANCELAR.",
-            ag.getClienteNome(), data, ag.getServico().getNome()
+            "Servico: %s\n" +
+            "Barbeiro: %s",
+            ag.getClienteNome(), data, ag.getServico().getNome(), barbeiro
         );
         enviar(ag.getClienteTelefone(), msg);
     }
