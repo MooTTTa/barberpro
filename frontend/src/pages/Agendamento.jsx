@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import DatePicker, { registerLocale } from 'react-datepicker'
+import { ptBR } from 'date-fns/locale'
+import { format } from 'date-fns'
+import 'react-datepicker/dist/react-datepicker.css'
 import { criarAgendamento, listarServicos, listarBarbeiros } from '../api/agendamentos'
+
+registerLocale('pt-BR', ptBR)
 
 const slides = ['/barber1.jpg', '/barber2.jpg', '/barber3.jpg']
 
@@ -10,6 +16,7 @@ export default function Agendamento() {
   const [barbeiros, setBarbeiros] = useState([])
   const [sucesso, setSucesso] = useState(false)
   const [slideAtual, setSlideAtual] = useState(0)
+  const [dataHora, setDataHora] = useState(null)
 
   useEffect(() => {
     listarServicos().then(r => setServicos(r.data))
@@ -24,17 +31,19 @@ export default function Agendamento() {
   }, [])
 
   const onSubmit = async (data) => {
+    if (!dataHora) { alert('Selecione a data e hora'); return }
     try {
       await criarAgendamento({
         clienteNome: data.clienteNome,
         clienteTelefone: data.clienteTelefone,
         barbeiroId: Number(data.barbeiroId),
         servicoId: Number(data.servicoId),
-        dataHora: data.dataHora,
+        dataHora: format(dataHora, "yyyy-MM-dd'T'HH:mm:ss"),
         observacao: data.observacao,
       })
       setSucesso(true)
       reset()
+      setDataHora(null)
       setTimeout(() => setSucesso(false), 5000)
     } catch (e) {
       alert(e.response?.data?.message || 'Erro ao agendar')
@@ -57,7 +66,6 @@ export default function Agendamento() {
           </div>
         ))}
 
-        {/* Overlay com texto */}
         <div className="absolute inset-0 flex flex-col justify-end p-12 z-10">
           <p className="text-amber-400 text-sm font-semibold tracking-widest uppercase mb-2">
             Bem-vindo
@@ -68,8 +76,6 @@ export default function Agendamento() {
           <p className="text-gray-300 text-sm max-w-xs">
             Agende seu horário em segundos e receba confirmação direto no WhatsApp.
           </p>
-
-          {/* Indicadores do slide */}
           <div className="flex gap-2 mt-8">
             {slides.map((_, i) => (
               <button
@@ -88,7 +94,6 @@ export default function Agendamento() {
       <div className="w-full lg:w-1/2 bg-zinc-950 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
 
-          {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-6">
               <div className="w-8 h-0.5 bg-amber-400" />
@@ -102,7 +107,6 @@ export default function Agendamento() {
             </p>
           </div>
 
-          {/* Sucesso */}
           {sucesso && (
             <div className="bg-amber-400/10 border border-amber-400/30 text-amber-400 rounded-lg p-4 mb-6 text-sm flex items-center gap-2">
               <span>✓</span>
@@ -112,7 +116,6 @@ export default function Agendamento() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-            {/* Nome */}
             <div>
               <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
                 Seu nome
@@ -125,7 +128,6 @@ export default function Agendamento() {
               />
             </div>
 
-            {/* Telefone */}
             <div>
               <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
                 WhatsApp
@@ -138,7 +140,6 @@ export default function Agendamento() {
               />
             </div>
 
-            {/* Barbeiro */}
             <div>
               <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
                 Barbeiro
@@ -155,7 +156,6 @@ export default function Agendamento() {
               </select>
             </div>
 
-            {/* Serviço */}
             <div>
               <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
                 Serviço
@@ -174,20 +174,27 @@ export default function Agendamento() {
               </select>
             </div>
 
-            {/* Data e hora */}
+            {/* Date Picker */}
             <div>
               <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
                 Data e hora
               </label>
-              <input
-                {...register('dataHora')}
-                type="datetime-local"
-                required
-                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-400 transition"
+              <DatePicker
+                selected={dataHora}
+                onChange={setDataHora}
+                showTimeSelect
+                timeFormat="HH:mm"
+                timeIntervals={30}
+                dateFormat="dd/MM/yyyy 'às' HH:mm"
+                locale="pt-BR"
+                placeholderText="Selecione a data e hora"
+                minDate={new Date()}
+                className="w-full bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-3 text-sm placeholder-zinc-600 focus:outline-none focus:border-amber-400 transition"
+                calendarClassName="barberpro-calendar"
+                wrapperClassName="w-full"
               />
             </div>
 
-            {/* Observação */}
             <div>
               <label className="text-zinc-400 text-xs uppercase tracking-wider mb-1.5 block">
                 Observação <span className="normal-case text-zinc-600">(opcional)</span>

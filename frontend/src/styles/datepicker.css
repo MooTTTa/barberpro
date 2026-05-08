@@ -1,0 +1,80 @@
+.barberpro-calendar {
+  background-color: #18181b !important;
+  border: 1px solid #3f3f46 !important;
+  border-radius: 12px !important;
+  font-family: inherit !important;
+  color: white !important;
+}
+
+.barberpro-calendar .react-datepicker__header {
+  background-color: #09090b !important;
+  border-bottom: 1px solid #3f3f46 !important;
+  border-radius: 12px 12px 0 0 !important;
+  padding: 12px !important;
+}
+
+.barberpro-calendar .react-datepicker__current-month,
+.barberpro-calendar .react-datepicker__day-name {
+  color: white !important;
+}
+
+.barberpro-calendar .react-datepicker__day {
+  color: #a1a1aa !important;
+  border-radius: 6px !important;
+}
+
+.barberpro-calendar .react-datepicker__day:hover {
+  background-color: #3f3f46 !important;
+  color: white !important;
+}
+
+.barberpro-calendar .react-datepicker__day--selected,
+.barberpro-calendar .react-datepicker__day--keyboard-selected {
+  background-color: #fbbf24 !important;
+  color: black !important;
+  font-weight: 600 !important;
+}
+
+.barberpro-calendar .react-datepicker__day--today {
+  color: #fbbf24 !important;
+  font-weight: 600 !important;
+}
+
+.barberpro-calendar .react-datepicker__day--disabled {
+  color: #52525b !important;
+}
+
+.barberpro-calendar .react-datepicker__navigation-icon::before {
+  border-color: #a1a1aa !important;
+}
+
+.barberpro-calendar .react-datepicker__time-container {
+  border-left: 1px solid #3f3f46 !important;
+}
+
+.barberpro-calendar .react-datepicker__time {
+  background-color: #18181b !important;
+}
+
+.barberpro-calendar .react-datepicker__time-list-item {
+  color: #a1a1aa !important;
+}
+
+.barberpro-calendar .react-datepicker__time-list-item:hover {
+  background-color: #3f3f46 !important;
+  color: white !important;
+}
+
+.barberpro-calendar .react-datepicker__time-list-item--selected {
+  background-color: #fbbf24 !important;
+  color: black !important;
+  font-weight: 600 !important;
+}
+
+.barberpro-calendar .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
+  background-color: #18181b !important;
+}
+
+.barberpro-calendar .react-datepicker-time__header {
+  color: white !important;
+}
